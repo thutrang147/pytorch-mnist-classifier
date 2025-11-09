@@ -185,45 +185,6 @@ class NeuralNet(nn.Module):
 
 *(Bạn có thể thêm ảnh chụp màn hình ứng dụng ở đây)*
 
-## 🎨 Tính năng nâng cao (Tùy chỉnh)
-
-### Thêm xử lý ảnh
-File `utils/predict.py` có hàm `preprocess_image()` để:
-- Tự động phát hiện và đảo màu (nếu nền trắng)
-- Resize về 28x28
-- Chuyển sang grayscale
-
-### Tùy chỉnh giao diện
-File `app.py` có CSS tùy chỉnh, bạn có thể thay đổi:
-- Màu sắc
-- Font chữ
-- Layout
-
-## 🔧 Test mô hình từ command line
-
-```bash
-python utils/predict.py
-```
-
-Sẽ test mô hình với 5 ảnh từ MNIST test set và lưu kết quả vào `test_predictions.png`
-
-## 🐛 Troubleshooting
-
-### Lỗi: "Không tìm thấy mô hình"
-➡️ Hãy chạy `python train.py` trước để train và lưu mô hình
-
-### Lỗi: "Import torch could not be resolved"
-➡️ Cài đặt PyTorch: `pip install torch torchvision`
-
-### Lỗi: "CUDA out of memory"
-➡️ Giảm `batch_size` trong `train.py` hoặc train trên CPU
-
-### Ảnh nhận diện sai
-➡️ Đảm bảo:
-- Chữ số rõ ràng, không bị mờ
-- Nền đơn giản (trắng hoặc đen)
-- Chỉ có 1 chữ số trong ảnh
-
 ## 📚 Tài nguyên tham khảo
 
 - [PyTorch Documentation](https://pytorch.org/docs/)
