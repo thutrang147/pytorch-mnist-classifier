@@ -96,7 +96,7 @@ def preprocess_image(image):
         image = image.convert('RGB')
     
     # Chuyển về grayscale
-    image = ImageOps.grayscale(image)
+    image = ImageOps.grayscale(image)   # L mode
     
     # Resize về 28x28 TRƯỚC KHI xử lý màu để giữ thông tin tốt hơn
     image = image.resize((28, 28), Image.Resampling.LANCZOS)

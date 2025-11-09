@@ -19,10 +19,10 @@ def train_model():
     
     # Hyperparameters
     input_size = 784      # 28x28 pixel
-    hidden_size = 128     # Số nơ-ron ở tầng ẩn
+    hidden_size = 128     # Số nơ-ron ở tầng ẩn, có thể chọn bất kỳ và tự sửa cho phù hợp
     num_classes = 10      # 10 chữ số (0-9)
     learning_rate = 0.001
-    batch_size = 64
+    batch_size = 64       # lấy 64 ảnh để học 1 lần
     num_epochs = 5        # Học 5 lần qua toàn bộ dữ liệu
     
     # ==================== CHUẨN BỊ DỮ LIỆU ====================
@@ -98,19 +98,19 @@ def train_model():
             # ---- 5 BƯỚC KINH ĐIỂN ----
             
             # 1. Forward pass
-            outputs = model(images)
+            outputs = model(images)     # học mô hình với ảnh
             
             # 2. Calculate Loss
-            loss = criterion(outputs, labels)
+            loss = criterion(outputs, labels)   # tính toán hàm mất mát
             
             # 3. Zero gradients
-            optimizer.zero_grad()
+            optimizer.zero_grad()   # xóa gradient cũ
             
             # 4. Backward pass
-            loss.backward()
+            loss.backward()  # tính toán gradient
             
             # 5. Update weights
-            optimizer.step()
+            optimizer.step()    # cập nhật trọng số
             
             # In kết quả mỗi 100 batch
             if (i + 1) % 100 == 0:
@@ -125,7 +125,7 @@ def train_model():
     print("\n--- ĐÁNH GIÁ MÔ HÌNH ---")
     model.eval()  # Chuyển sang chế độ eval
     
-    with torch.no_grad():
+    with torch.no_grad():   # Không tính toán gradient
         correct = 0
         total = 0
         
