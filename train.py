@@ -29,9 +29,16 @@ def train_model():
     
     print("\n--- ĐANG TẢI DỮ LIỆU MNIST ---")
     
-    # Định nghĩa phép biến đổi
+    # Định nghĩa phép biến đổi với Data Augmentation để mô hình robust hơn
     transform = transforms.Compose([
+        transforms.RandomRotation(10),      # Xoay ngẫu nhiên ±10 độ
+        transforms.RandomAffine(             # Biến dạng nhẹ (shift, scale)
+            degrees=0, 
+            translate=(0.1, 0.1),           # Dịch chuyển 10%
+            scale=(0.9, 1.1)                # Scale 90%-110%
+        ),
         transforms.ToTensor(),
+        transforms.RandomInvert(p=0.5),     # 50% ảnh bị đảo màu (nền trắng/chữ đen)
     ])
     
     # Tải dữ liệu train và test

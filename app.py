@@ -1,17 +1,12 @@
-"""
-Ứng dụng web Streamlit để nhận diện chữ số viết tay
-"""
 import streamlit as st
 import torch
 from PIL import Image, ImageOps
-# Hỗ trợ HEIF/HEIC nếu pillow_heif được cài
 HEIF_SUPPORTED = False
 try:
     import pillow_heif
     pillow_heif.register_heif_opener()
     HEIF_SUPPORTED = True
 except Exception:
-    # Nếu không cài, chúng ta sẽ hiển thị hướng dẫn trong app khi cần
     HEIF_SUPPORTED = False
 import numpy as np
 import os
@@ -93,9 +88,8 @@ def preprocess_image(image):
     """
     Xử lý ảnh để phù hợp với mô hình MNIST
     - Chuyển về grayscale
-    - Tăng độ sắc nét và tương phản
-    - Đảo màu nếu cần (đảm bảo nền đen, chữ trắng như MNIST)
-    - Resize về 28x28 với kỹ thuật giữ nét
+    - Đảm bảo nền đen, chữ trắng như MNIST
+    - Resize về 28x28
     """
     # Chuyển về RGB trước (tránh lỗi với ảnh RGBA)
     if image.mode != 'RGB':
@@ -104,28 +98,34 @@ def preprocess_image(image):
     # Chuyển về grayscale
     image = ImageOps.grayscale(image)
     
-    # Tăng độ sắc nét (sharpen) trước khi resize
-    from PIL import ImageFilter, ImageEnhance
-    image = image.filter(ImageFilter.SHARPEN)
-    
-    # Tăng độ tương phản mạnh hơn
-    enhancer = ImageEnhance.Contrast(image)
-    image = enhancer.enhance(2.0)  # Tăng 2x độ tương phản
-    
-    # Kiểm tra xem nền là trắng hay đen
-    # MNIST: nền đen (0), chữ trắng (255)
-    img_array = np.array(image)
-    if img_array.mean() > 128:
-        image = ImageOps.invert(image)
-    
-    # Resize về 28x28 với LANCZOS (chất lượng cao nhất)
+    # Resize về 28x28 TRƯỚC KHI xử lý màu để giữ thông tin tốt hơn
     image = image.resize((28, 28), Image.Resampling.LANCZOS)
     
-    # Sau resize, làm sắc nét lại bằng threshold để tăng độ rõ nét
-    img_array = np.array(image)
-    # Áp dụng threshold nhẹ để làm nổi bật chữ số
-    threshold = 50
-    img_array = np.where(img_array > threshold, img_array, 0)
+    # Convert sang array để phân tích
+    img_array = np.array(image).astype(float)
+    
+    # Kiểm tra xem nền là trắng hay đen bằng cách xem pixel ở 4 góc
+    # (Giả định: nền chiếm phần lớn ảnh)
+    corners = [
+        img_array[0, 0], img_array[0, -1], 
+        img_array[-1, 0], img_array[-1, -1]
+    ]
+    avg_corner = np.mean(corners)
+    
+    # Nếu góc sáng (>128) => nền sáng, cần đảo ngược
+    # Nếu góc tối (<128) => nền tối, giữ nguyên
+    if avg_corner > 128:
+        # Nền trắng (sáng) -> Đảo ngược để có nền đen
+        img_array = 255 - img_array
+    
+    # Normalize và tăng độ tương phản bằng histogram stretching
+    # Tìm min/max thực tế của ảnh (bỏ qua outliers)
+    p2, p98 = np.percentile(img_array, (2, 98))
+    
+    # Stretch histogram: kéo giá trị từ [p2, p98] về [0, 255]
+    img_array = np.clip((img_array - p2) * 255.0 / (p98 - p2), 0, 255)
+    
+    # Convert back to PIL Image
     image = Image.fromarray(img_array.astype('uint8'))
     
     return image
@@ -160,8 +160,7 @@ def create_probability_chart(probabilities):
 def main():
     # Header
     st.markdown('<h1 class="main-header">🔢 Nhận Diện Số Viết Tay</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Sử dụng Deep Learning với PyTorch & MNIST Dataset</p>', unsafe_allow_html=True)
-    
+
     # Load mô hình
     with st.spinner('Đang load mô hình...'):
         predictor = load_model()
@@ -361,10 +360,6 @@ def main():
     # Footer
     st.markdown("---")
     st.markdown("""
-    <div style="text-align: center; color: #777;">
-        <p>Được xây dựng với ❤️ sử dụng PyTorch, Streamlit và MNIST Dataset</p>
-        <p>Mô hình: Neural Network 3 tầng (784 → 128 → 10)</p>
-    </div>
     """, unsafe_allow_html=True)
 
 
