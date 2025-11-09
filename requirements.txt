@@ -1,0 +1,22 @@
+# Dependencies cho dự án Nhận Diện Số Viết Tay
+
+# Deep Learning Framework
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Web Framework
+streamlit>=1.28.0
+
+# Image Processing
+Pillow>=10.0.0
+opencv-python>=4.8.0
+
+# Data Science
+numpy>=1.24.0
+matplotlib>=3.7.0
+
+# Utils
+tqdm>=4.66.0
+
+# Optional: support HEIC/HEIF images from iPhone
+pillow-heif>=0.8.0
